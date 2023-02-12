@@ -51,6 +51,22 @@ dataset:
       - select: image
         options: [jekyll/jekyll:pages, jekyll/jekyll:latest]
         defaultValue: jekyll/jekyll:pages
+  
+  - const: torQ
+    desc: Questions for returning what to do for configuring a Tor service.
+    tags: [hidden, questions]
+    value:
+      - input: host
+        title: Host where the service is listening
+        defaultValue: localhost
+      - input: port
+        title: Port number where the service is listening
+        defaultValue: 4000
+      - input: torServiceName
+        defaultValue: jekyll
+      - input: torServicePort
+        title: Local port number where the Tor service will listen
+        defaultValue: 80
 
 jobs:
   - macro: data
@@ -92,3 +108,28 @@ jobs:
       - quiet: $answers = inquire $(dockerQ) $(answers)
     steps:
       - log sudo docker run --name $(answers.container) -v $PWD:/srv/jekyll -p 4000:4000 -it --rm $(answers.image) bash -c 'bundle update && bundle exec jekyll clean && bundle exec jekyll s --host 0.0.0.0 --verbose'
+
+  - macro: tor
+    title: Return how to create a Tor service
+    ini:
+      - quiet: $answers = inquire $(torQ) $(answers)
+    dataset:
+      - var: content
+      - const: tmpl
+        value: |
+          # (1) add this configuration to /etc/tor/torrc
+          HiddenServiceDir /var/lib/tor/hidden_service_{{torServiceName}}
+          HiddenServicePort {{torServicePort}} {{host}}:{{port}}
+
+          # (2) restart the service
+          sudo service tor restart
+          service tor status
+
+          # (3) query the onion domain
+          sudo cat /var/lib/tor/hidden_service_{{torServiceName}}/hostname
+
+          # (4) query website
+          brave --incognito --tor http://`sudo cat /var/lib/tor/hidden_service_{{torServiceName}}/hostname`:{{torServicePort}}
+    steps:
+      - quiet: $content = hbs.render $(tmpl) $(answers)
+      - log $(content)
