@@ -1,0 +1,60 @@
+title: {{websiteTitle}}
+locale: {{websiteLocale}}
+tagline: {{websiteTagline}}
+baseurl: {{websiteBase}}
+# google_analytics: G-XXXXXXXXXXXX
+description: |
+  {{websiteDesc}}
+
+author:
+  name: {{websiteAuthorName}}
+  twitter: {{websiteAuthorTwitter}}
+
+{{#if websiteTwitter}}
+twitter:
+  card: summary
+  username: {{websiteTwitter}}
+{{else}}
+# twitter:
+#   card: summary
+#   username: username
+{{/if}}
+
+plugins:
+  {{#each plugins}}
+  - {{this}}
+  {{/each}}
+
+remote_theme: jekyll/minima
+minima:
+  skin: auto
+  {{#if websiteTwitter}}
+  social_links:
+    - platform: twitter
+      user_url: https://twitter.com/{{websiteTwitter}}
+    # - platform: github
+    #   user_url: https://github.com/OWNER
+  {{else}}
+  # social_links:
+  #   - platform: twitter
+  #     user_url: https://twitter.com/USERNAME
+  #   - platform: github
+  #     user_url: https://github.com/OWNER
+  {{/if}}
+
+show_excerpts: false
+
+# collections:
+#   name:
+#     title:
+#     output: true
+#     permalink: /:collection/:path
+#     order:
+#       - page1.md
+#       - page2.md
+      
+# defaults:
+#   - scope:
+#       path: ""
+#       type: # collection-name, pages, posts
+#     values: {} # front-matter properties

@@ -19,6 +19,11 @@ dataset:
         kramdown-parser-gfm: "1.1.0"
         minima: "2.5.1"
 
+  - const: commonSrc
+    desc: Dir where the source templates are.
+    tags: [hidden]
+    value: $(__dir)/__common
+
   - const: websiteDir
     desc: Common question for getting the site dir.
     tags: [hidden]
@@ -43,4 +48,10 @@ dataset:
         - jekyll-remote-theme
         - jekyll-seo-tag
         - jekyll-sitemap
-  
+
+jobs:
+  - macro: gitignore
+    title: Create the .gitignore file
+    dataset: [data, item, content]
+    steps:
+      - cr.copy $(commonSrc)/_gitignore $(dst)/.gitgnore
