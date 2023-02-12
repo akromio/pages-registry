@@ -1,0 +1,36 @@
+spec: v1.0
+desc: Catalog for creating GitHub Actions workflows to publish on GitHub Pages.
+
+dataset:
+  - const: src
+    desc: Dir where the source templates are.
+    value: $(__dir)/_$(__catalogName)
+    tags: [hidden]
+  
+  - const: dst
+    desc: Local directory where to save the files.
+    value: $(workDir)
+  
+  - const: workflowQ
+    desc: Questions for generating a GitHub workflow
+    tags: [hidden, questions]
+    value:
+      - input: workflowName
+        defaultValue: pages build and deployment
+      - input: workflowFileName
+        title: Workflow file name (w/o extension)
+        defaultValue: pages-build-deployment
+  
+defaultJobName: workflow
+jobs:
+  - macro: workflow
+    title: Create a GitHub Actions workflow for publishing website on GitHub Pages
+    ini:
+      - quiet: $answers = inquire $(workflowQ) $(answers)
+    dataset: [item, content]
+    steps:
+      - fs.createDir $(dst)/.github/workflows
+
+      - quiet: $item = cr.getItem $(src)/workflow.yaml.hbs
+      - quiet: $content = hbs.render $(item.value) $(answers)
+      - file.write $(content) $(dst)/.github/workflows/$(answers.workflowFileName).yaml
