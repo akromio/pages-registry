@@ -1,0 +1,46 @@
+spec: v1.0
+desc: Catalog with common things.
+
+dataset:
+  - const: gems
+    desc: Gemfile dependencies got from https://pages.github.com/versions.
+    tags: [hidden]
+    value:
+      gems:
+        jekyll: "3.9.3"
+        jekyll-avatar: "0.7.0"
+        jekyll-feed: "0.15.1"
+        jekyll-paginate: "1.1.0"
+        jekyll-readme-index: "0.3.0"
+        jekyll-redirect-from: "0.16.0"
+        jekyll-remote-theme: "0.4.3"
+        jekyll-seo-tag: "2.8.0"
+        jekyll-sitemap: "1.4.0"
+        kramdown-parser-gfm: "1.1.0"
+        minima: "2.5.1"
+
+  - const: websiteDir
+    desc: Common question for getting the site dir.
+    tags: [hidden]
+    value:
+      select: websiteDir
+      options: [/, /docs]
+      defaultValue: /
+  
+  - const: plugins
+    desc: Common question for getting the plugins.
+    tags: [hidden]
+    value:
+      select: plugins
+      multiple: true
+      defaultValue: [jekyll-remote-theme, jekyll-seo-tag, jekyll-sitemap]
+      options:
+        - jekyll-avatar
+        - jekyll-feed
+        - jekyll-paginate
+        - jekyll-readme-index
+        - jekyll-redirect-from
+        - jekyll-remote-theme
+        - jekyll-seo-tag
+        - jekyll-sitemap
+  

@@ -1,0 +1,16 @@
+source "https://rubygems.org"
+
+# Jekyll
+gem "jekyll", "~> {{gems.jekyll}}"
+gem "minima", "~> {{gems.minima}}"
+gem "kramdown-parser-gfm", "~> {{gems.kramdown-parser-gfm}}"
+
+# Local webserver
+gem "webrick"
+
+# Plugins
+group :jekyll_plugins do
+  {{#each plugins}}
+  gem "{{this}}", "~> {{lookup @root.gems this}}"
+  {{/each}}
+end
