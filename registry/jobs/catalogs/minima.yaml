@@ -1,0 +1,91 @@
+spec: v1.0
+desc: A catalog for working with the minima theme.
+extends:
+  - _common.yaml
+  - _gemfile.yaml
+
+dataset:
+  - const: src
+    desc: Dir where the source templates are.
+    tags: [hidden]
+    value: $(__dir)/_$(__catalogName)
+  
+  - const: dst
+    desc: Local directory where to save the files.
+    value: $(workDir)
+  
+  - const: configQ
+    desc: Questions for the creation of the _config.yaml
+    tags: [hidden, questions]
+    value:
+      - $(websiteDir)
+      - input: websiteLocale
+        defaultValue: en_GB
+      - input: websiteTitle
+      - input: websiteTagline
+      - input: websiteDesc
+      - input: websiteBase
+        defaultValue: /
+      - input: websiteTwitter
+        title: Website Twitter (w/o @)
+      - input: websiteAuthorName
+      - input: websiteAuthorTwitter
+        title: Website author twitter (w/o @)
+      - $(plugins)
+  
+  - const: websiteQ
+    desc: Questions for the creation of a Jekyll website.
+    tags: [hidden, questions]
+    value: $(configQ)
+    append:
+      - confirm: gemfile
+        title: Do you like to generate the Gemfile
+        defaultValue: true
+      - confirm: style
+        title: Do you like to customize the SCSS style
+        defaultValue: true
+  
+  - const: styleQ
+    desc: Questions for the creation of the SCSS file when minima used.
+    tags: [hidden, questions]
+    value:
+      - $(websiteDir)
+  
+defaultJobName: website
+jobs:
+  - macro: config
+    title: Create the _config.yaml file
+    ini:
+      - quiet: $answers = inquire $(configQ) $(answers)
+    dataset: [item, content]
+    steps:
+      - quiet: $item = cr.getItem $(src)/_config.yaml.hbs
+      - quiet: $content = hbs.render $(item.value) $(answers)
+      - fs.createDir $(dst)/$(answers.websiteDir)
+      - file.write $(content) $(dst)/$(answers.websiteDir)/_config.yaml
+
+  - macro: website
+    title: Create the scaffold for a Jekyll website using the minima theme
+    ini:
+      - quiet: $answers = inquire $(websiteQ) $(answers)
+    dataset: [item, content]
+    steps:
+      - fs.createDir $(dst)/$(answers.websiteDir)
+      - fs.createDir $(dst)/$(answers.websiteDir)/_data
+      - fs.createDir $(dst)/$(answers.websiteDir)/_includes
+      - fs.createDir $(dst)/$(answers.websiteDir)/_layouts
+      - fs.createDir $(dst)/$(answers.websiteDir)/_posts
+      - gitignore
+      - config
+      - if: answers.gemfile
+        step: gemfile
+      - if: answers.style
+        step: style
+
+  - macro: style
+    title: Create the SCSS file for overriding this default
+    ini:
+      - quiet: $answers = inquire $(styleQ) $(answers)
+    steps:
+      - fs.createDir $(dst)/$(answers.websiteDir)/assets/css
+      - cr.copy $(src)/assets/css/style.scss $(dst)/$(answers.websiteDir)/assets/css/style.scss

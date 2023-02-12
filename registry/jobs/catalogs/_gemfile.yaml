@@ -1,0 +1,30 @@
+spec: v1.0
+desc: Usable catalog with things on the Gemfile.
+requires: _common.yaml
+
+dataset:
+  - const: gemfileSrc
+    desc: Dir where the source templates are.
+    tags: [hidden]
+    value: $(__dir)/__gemfile
+
+  - const: gemfileQ
+    desc: Questions for the creation of Gemfile
+    tags: [hidden, questions]
+    value:
+      - $(websiteDir)
+      - $(plugins)
+
+jobs:
+  - macro: gemfile
+    title: Create the Gemfile file
+    ini:
+      - quiet: $answers = inquire $(gemfileQ) $(answers)
+    dataset: [data, item, content]
+    steps:
+      - fs.createDir $(dst)/$(answers.websiteDir)
+
+      - quiet: $item = cr.getItem $(gemfileSrc)/Gemfile.hbs
+      - quiet: $data = merge $(answers) $(gems)
+      - quiet: $content = hbs.render $(item.value) $(data)
+      - file.write $(content) $(dst)$(answers.websiteDir)/Gemfile

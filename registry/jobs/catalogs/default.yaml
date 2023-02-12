@@ -1,12 +1,14 @@
 spec: v1.0
 desc: Default catalog for working with GitHub Pages.
-extends: _common.yaml
+extends:
+  - _common.yaml
+  - _gemfile.yaml
 
 dataset:
   - const: src
     desc: Dir where the source templates are.
-    value: $(__dir)/_$(__catalogName)
     tags: [hidden]
+    value: $(__dir)/_$(__catalogName)
   
   - const: dst
     desc: Local directory where to save the files.
@@ -19,13 +21,6 @@ dataset:
       - $(websiteDir)
       - input: fileName
         title: File name (w/o extension)
-  
-  - const: gemfileQ
-    desc: Questions for the creation of Gemfile
-    tags: [hidden, questions]
-    value:
-      - $(websiteDir)
-      - $(plugins)
   
   - const: frontMatterQ
     desc: Questions for building a front matter.
@@ -58,20 +53,6 @@ dataset:
         defaultValue: jekyll/jekyll:pages
 
 jobs:
-  - macro: gemfile
-    title: Create the Gemfile file
-    ini:
-      - quiet: $answers = inquire $(gemfileQ) $(answers)
-    dataset: [data, item, content]
-    steps:
-      - fs.createDir $(dst)/$(answers.websiteDir)
-
-      - quiet: $item = cr.getItem $(src)/Gemfile.hbs
-      - quiet: $data = merge $(answers) $(gems)
-      - log $(item.value)
-      - quiet: $content = hbs.render $(item.value) $(data)
-      - file.write $(content) $(dst)$(answers.websiteDir)/Gemfile
-  
   - macro: data
     title: Create a data file
     ini:
