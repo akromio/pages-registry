@@ -51,6 +51,10 @@ dataset:
       - select: image
         options: [jekyll/jekyll:pages, jekyll/jekyll:latest]
         defaultValue: jekyll/jekyll:pages
+      - select: command
+        title: What command sequence would you like to use
+        options: [clean && build && server, clean && serve]
+        defaultValue: clean && build && serve
   
   - const: torQ
     desc: Questions for returning what to do for configuring a Tor service.
@@ -104,15 +108,22 @@ jobs:
   
   - macro: docker
     title: Return a command line for running Jekyll with Docker
+    dataset:
+      - var: content
+      - const: tmpl
+        value: >
+          sudo docker run --name {{container}} -v $PWD:/srv/jekyll -p 4000:4000 -it --rm {{image}} bash -c
+          'bundle update && bundle exec jekyll clean &&
+          {{#if (eq command "clean && serve")}}bundle exec jekyll s{{else}}bundle exec jekyll b && bundle exec jekyll s --skip-initial-build{{/if}}
+          --host 0.0.0.0 --verbose'
     ini:
       - quiet: $answers = inquire $(dockerQ) $(answers)
     steps:
-      - log sudo docker run --name $(answers.container) -v $PWD:/srv/jekyll -p 4000:4000 -it --rm $(answers.image) bash -c 'bundle update && bundle exec jekyll clean && bundle exec jekyll s --host 0.0.0.0 --verbose'
+      - quiet: $content = hbs.render $(tmpl) $(answers)
+      - log $(content)
 
   - macro: tor
     title: Return how to create a Tor service
-    ini:
-      - quiet: $answers = inquire $(torQ) $(answers)
     dataset:
       - var: content
       - const: tmpl
@@ -130,6 +141,8 @@ jobs:
 
           # (4) query website
           brave --incognito --tor http://`sudo cat /var/lib/tor/hidden_service_{{torServiceName}}/hostname`:{{torServicePort}}
+    ini:
+      - quiet: $answers = inquire $(torQ) $(answers)
     steps:
       - quiet: $content = hbs.render $(tmpl) $(answers)
       - log $(content)
