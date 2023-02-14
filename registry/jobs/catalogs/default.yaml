@@ -53,8 +53,11 @@ dataset:
         defaultValue: jekyll/jekyll:pages
       - select: command
         title: What command sequence would you like to use
-        options: [clean && build && server, clean && serve]
+        options: [clean && build && serve, clean && serve, clean && build]
         defaultValue: clean && build && serve
+      - select: environment
+        options: [development, production]
+        defaultValue: development
   
   - const: torQ
     desc: Questions for returning what to do for configuring a Tor service.
@@ -114,8 +117,8 @@ jobs:
         value: >
           sudo docker run --name {{container}} -v $PWD:/srv/jekyll -p 4000:4000 -it --rm {{image}} bash -c
           'bundle update && bundle exec jekyll clean &&
-          {{#if (eq command "clean && serve")}}bundle exec jekyll s{{else}}bundle exec jekyll b && bundle exec jekyll s --skip-initial-build{{/if}}
-          --host 0.0.0.0 --verbose'
+          {{#if (eq command "clean && build")}}{{#if (eq environment "production")}}JEKYLL_ENV=production {{/if}}bundle exec jekyll b{{else if (eq command "clean && serve")}}bundle exec jekyll s --host 0.0.0.0{{else}}bundle exec jekyll b && bundle exec jekyll s --skip-initial-build --host 0.0.0.0{{/if}}
+          --verbose'
     ini:
       - quiet: $answers = inquire $(dockerQ) $(answers)
     steps:
