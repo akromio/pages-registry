@@ -146,3 +146,10 @@ jobs:
     steps:
       - quiet: $content = hbs.render $(tmpl) $(answers)
       - log $(content)
+
+  - macro: versions
+    title: Return the GitHub Pages versions
+    dataset: [resp]
+    steps:
+      - $resp = http.get https://pages.github.com/versions.json
+      - log: yaml.encode $(resp.data)
