@@ -24,6 +24,7 @@ dataset:
       - input: websiteTitle
       - input: websiteTagline
       - input: websiteDesc
+      - input: websiteUrl
       - input: websiteBase
         defaultValue: /
       - input: websiteTwitter
